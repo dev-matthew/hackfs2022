@@ -1,23 +1,16 @@
 import './App.css';
+import Folder from "./components/Folder";
 
-function App() {
+let folders = ["Folder1", "Folder2", "Folder3"];
+
+export default function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {folders.map((folder, index) => {
+        return (
+          <Folder name={folder} index={index}/>
+        );
+      })}
     </div>
   );
 }
-
-export default App;
