@@ -13,43 +13,55 @@ export default function App() {
   const [progressWidth, setProgressWidth] = useState(0);
 
   async function handlePrivateKey(privateKey, password) {
-    wallet = new Wallet(privateKey);
-    if (password !== "") {
-      let encrypted = await wallet.encrypt(password, setProgressWidth);
-      localStorage.setItem("privateKey", encrypted);
-    } else {
-      localStorage.setItem("privateKey", privateKey);
+    try {
+      wallet = new Wallet(privateKey);
+      if (password !== "") {
+        let encrypted = await wallet.encrypt(password, setProgressWidth);
+        localStorage.setItem("privateKey", encrypted);
+      } else {
+        localStorage.setItem("privateKey", privateKey);
+      }
+      console.log(wallet);
+      reset();
+    } catch(e) {
+      alert("Invalid private key");
     }
-    console.log(wallet);
-    setSettings(false);
-    setActiveLeft(0);
   }
 
   async function activateWallet(password) {
     if (password !== "") {
-      wallet = await Wallet.fromEncryptedJson(localStorage.getItem("privateKey"), password, setProgressWidth);
+      try {
+        wallet = await Wallet.fromEncryptedJson(localStorage.getItem("privateKey"), password, setProgressWidth);
+      } catch(e) {
+        alert("Invalid password");
+      }
     } else {
       wallet = new Wallet(localStorage.getItem("privateKey"));
     }
     console.log(wallet);
+    reset();
+  }
+
+  function reset() {
     setPasswordNeeded(false);
+    setSettings(false);
     setActiveLeft(0);
+    setProgressWidth(0);
   }
 
   useEffect(() => {
     if (!passwordNeeded && localStorage.getItem("privateKey") !== null) {
       activateWallet("");
     }
-  }, [passwordNeeded])
+  }, [activateWallet, passwordNeeded])
 
   return (
     <div className="App">
       {settings && <div className="Settings">
-        <IoMdClose className="ClosePrivateKey Icon"
+        {localStorage.getItem("privateKey") !== null && <IoMdClose className="ClosePrivateKey Icon"
           onClick={() => {
-            setSettings(false);
-            setActiveLeft(0);
-          }}/>
+            reset();
+          }}/>}
         <div className="Progress" id="PrivateKeyProgress"
           style={{
             width: progressWidth * 500 + "px"
