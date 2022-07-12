@@ -1,7 +1,14 @@
 import logo from './logo.svg';
 import './App.css';
+import { Client } from '@xmtp/xmtp-js'  
+import { Wallet } from 'ethers'
 
-function App() {
+async function App() {
+
+  
+  // You'll want to replace this with a wallet from your application
+  const wallet = Wallet.createRandom()
+
   return (
     <div className="App">
       <header className="App-header">
