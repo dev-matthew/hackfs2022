@@ -3,6 +3,7 @@ import {useEffect, useState} from 'react';
 import {FiSettings} from 'react-icons/fi';
 import {IoMdClose} from 'react-icons/io';
 import {Wallet} from 'ethers';
+import { Client } from '@xmtp/xmtp-js'
 
 var wallet;
 
@@ -19,12 +20,21 @@ export default function App() {
         let encrypted = await wallet.encrypt(password, setProgressWidth);
         localStorage.setItem("privateKey", encrypted);
       } else {
-        localStorage.setItem("privateKey", privateKey);
+        localStorage.setItem("privateKey", privateKey); // encrypt with some default value
       }
-      console.log(wallet);
       reset();
+      createNewClient(privateKey);
     } catch(e) {
       alert("Invalid private key");
+    }
+  }
+
+  async function createNewClient(privateKey) {
+    try {
+      const xmtp = await Client.create(wallet);
+      return xmtp;
+    } catch(e) {
+      alert("Cannot create client");
     }
   }
 
@@ -38,7 +48,6 @@ export default function App() {
     } else {
       wallet = new Wallet(localStorage.getItem("privateKey"));
     }
-    console.log(wallet);
     reset();
   }
 
