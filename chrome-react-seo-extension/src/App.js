@@ -1,17 +1,19 @@
 import './App.css';
 import {useEffect, useState} from 'react';
-import {FiSettings} from 'react-icons/fi';
+import {FiSettings, FiSmartphone} from 'react-icons/fi';
 import {IoMdClose} from 'react-icons/io';
 import {Wallet} from 'ethers';
 import { Client } from '@xmtp/xmtp-js'
 
 var wallet;
+var xmtp;
 
 export default function App() {
   const [activeLeft, setActiveLeft] = useState(0);
   const [settings, setSettings] = useState(localStorage.getItem("privateKey") === null);
   const [passwordNeeded, setPasswordNeeded] = useState(localStorage.getItem("privateKey") !== null && localStorage.getItem("privateKey").includes("cipher"));
   const [progressWidth, setProgressWidth] = useState(0);
+
 
   async function handlePrivateKey(privateKey, password) {
     try {
@@ -23,7 +25,7 @@ export default function App() {
         localStorage.setItem("privateKey", privateKey); // encrypt with some default value
       }
       reset();
-      createNewClient(privateKey);
+      createNewClient(privateKey)
     } catch(e) {
       alert("Invalid private key");
     }
@@ -31,11 +33,21 @@ export default function App() {
 
   async function createNewClient(privateKey) {
     try {
-      const xmtp = await Client.create(wallet);
-      return xmtp;
+      xmtp = await Client.create(wallet);
     } catch(e) {
       alert("Cannot create client");
     }
+  }
+
+  async function sendMessage(publicKey, message) {
+    try {
+      const convo = await xmtp.conversations.newConversation(publicKey);
+      console.log(message);
+    } catch(e) {
+
+    }
+    console.log(message)
+    reset();
   }
 
   async function activateWallet(password) {
@@ -49,6 +61,7 @@ export default function App() {
       wallet = new Wallet(localStorage.getItem("privateKey"));
     }
     reset();
+    createNewClient(localStorage.getItem("privateKey"))
   }
 
   function reset() {
@@ -95,18 +108,40 @@ export default function App() {
             }}>Enter</button>
       </div>}
 
+      {activeLeft===1 && <div className="Settings">
+        {localStorage.getItem("privateKey") !== null && <IoMdClose className="ClosePrivateKey Icon"
+          onClick={() => {
+            reset();
+          }}/>}
+        <div className="Progress" id="PrivateKeyProgress"
+          style={{
+            width: progressWidth * 500 + "px"
+          }}></div>
+        <input className="SettingsInput" id="PublicKey" type="text" autoComplete="off" placeholder="Public Key"></input>
+        <input className="SettingsInput" id="Message" type="text" autoComplete="off" placeholder="Message"></input>
+        <button className="Save SaveSettings"
+          onClick={() => {
+            sendMessage(document.getElementById("PublicKey").value, document.getElementById("Message").value);
+          }}>Save</button>
+      </div>}
+
       <div className="LeftNav">
         <div className="LeftNavHeader">
           <span className="LeftNavHeaderOption"
-            onClick={() => setActiveLeft(0)}
+            onClick={() => {
+              setActiveLeft(1)
+            }}
             style={{
               color: activeLeft === 0 ? "white" : "rgba(255,255,255,0.5)"
-            }}>Sites</span>
+            }}>Message</span>
           <span className="LeftNavHeaderOption"
-            onClick={() => setActiveLeft(1)}
+            onClick={() => {
+              setActiveLeft(0)
+              reset()
+            }}
             style={{
               color: activeLeft === 1 ? "white" : "rgba(255,255,255,0.5)"
-            }}>People</span>
+            }}>New</span>
           <FiSettings className="OpenSettings Icon"
             onClick={() => {
               setActiveLeft(3);
