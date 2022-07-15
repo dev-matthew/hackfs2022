@@ -4,12 +4,12 @@
   "description": "Extension Decription",
   "version": "0.1.0",
   "icons": {
-      "16": "./logo192.png",
-      "48": "./logo192.png",
-      "128": "./logo192.png"
+      "16": "./Relay.jpeg",
+      "48": "./Relay.jpeg",
+      "128": "./Relay.jpeg"
   },
   "action": {
-      "default_icon": "./logo192.png",
+      "default_icon": "./Relay.jpeg",
       "default_popup": "./index.html",
       "default_title": "Extension Name"
   },

@@ -42,12 +42,56 @@ export default function App() {
   async function sendMessage(publicKey, message) {
     try {
       const convo = await xmtp.conversations.newConversation(publicKey);
-      console.log(message);
+      await convo.send(message);
+      getMessages(publicKey);
     } catch(e) {
-
+      alert("Recipient is not on XMTP network.")
     }
-    console.log(message)
     reset();
+  }
+
+  async function getConversations() {
+    try {
+      const convos = await xmtp.conversations.list();
+      console.log(convos)
+      // var addresses = [];
+      // var i = 0;
+      // for (const convo of await convos.messages()) {
+      //   addresses[i] = convo.peerAddress;
+      //   i += 1;
+      // }
+      // addresses.forEach(function(item) {
+      //   var li = document.createElement("li");
+      //   var text = document.createTextNode(item);
+      //   li.appendChild(text);
+      //   document.getElementById("addresses").appendChild(li);
+      // });
+    } catch(e) {
+      console.log(e);
+    }
+  }
+
+  async function getMessages(publicKey) {
+    try {
+      const convo = await xmtp.conversations.newConversation(publicKey);
+      var messages = [];
+      var i = 0;
+      for (const message of await convo.messages()) {
+        if (message.senderAddress == xmtp.address) {
+          messages[i] = message;
+          i += 1;
+        }
+      }
+
+      messages.forEach(function(item) {
+        var li = document.createElement("li");
+        var text = document.createTextNode(item.content);
+        li.appendChild(text);
+        document.getElementById("messages").appendChild(li);
+      });
+    } catch(e) {
+      console.log(e);
+    }
   }
 
   async function activateWallet(password) {
@@ -108,7 +152,7 @@ export default function App() {
             }}>Enter</button>
       </div>}
 
-      {activeLeft===1 && <div className="Settings">
+      {activeLeft===1 && !passwordNeeded && <div className="Settings">
         {localStorage.getItem("privateKey") !== null && <IoMdClose className="ClosePrivateKey Icon"
           onClick={() => {
             reset();
@@ -136,12 +180,10 @@ export default function App() {
             }}>Message</span>
           <span className="LeftNavHeaderOption"
             onClick={() => {
-              setActiveLeft(0)
-              reset()
             }}
             style={{
               color: activeLeft === 1 ? "white" : "rgba(255,255,255,0.5)"
-            }}>New</span>
+            }}>Load Convos</span>
           <FiSettings className="OpenSettings Icon"
             onClick={() => {
               setActiveLeft(3);
@@ -152,7 +194,9 @@ export default function App() {
             }}/>
         </div>
       </div>
-      <div className="MiddleNav"></div>
+      <div className="MiddleNav">
+        <ul id="addresses"></ul>
+      </div>
     </div>
   );
 }
