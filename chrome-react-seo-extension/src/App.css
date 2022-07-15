@@ -158,3 +158,32 @@
 #PrivateKeyProgress {
   top: 130px;
 }
+
+.Option {
+  position: relative;
+  top: 40px;
+  left: 7px;
+  width: 165px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 5px;
+  border-radius: 8px;
+}
+
+.Option:hover {
+  background-color: #30333E;
+  cursor: pointer;
+}
+
+.NewMessage {
+  border: 1px solid rgba(255,255,255,0.5);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.Site {
+  padding-left: 10px;
+  width: 158px;
+}
