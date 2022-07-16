@@ -6,12 +6,14 @@ import {Wallet} from 'ethers';
 import {Client} from '@xmtp/xmtp-js';
 
 var wallet, xmtp;
+var conversations = [];
 
 export default function App() {
   const [activeLeft, setActiveLeft] = useState(0);
   const [settings, setSettings] = useState(localStorage.getItem("privateKey") === null);
   const [passwordNeeded, setPasswordNeeded] = useState(localStorage.getItem("privateKey") !== null && localStorage.getItem("privateKey").includes("cipher"));
   const [progressWidth, setProgressWidth] = useState(0);
+  const [loadedPeople, setLoadedPeople] = useState(false);
 
   async function handlePrivateKey(privateKey, password) {
     try {
@@ -48,13 +50,14 @@ export default function App() {
 
   async function activateXMTP() {
     xmtp = await Client.create(wallet);
-    await sendMessage("0xe2037FD7bEaF4E550C12719aDBdad50F39d3aAE5", "First Message", "uniswap.org")
+    console.log(xmtp);
+    await getAllConversations();
+    //await sendMessage("0xe2037FD7bEaF4E550C12719aDBdad50F39d3aAE5", "First Message", "uniswap.org")
   }
 
   async function sendMessage(address, message, website="None") {
     let conversation = await xmtp.conversations.newConversation(address);
     await conversation.send(website + "////" + message);
-    await getAllMessages(address);
   }
 
   async function getAllMessages(address) {
@@ -66,8 +69,14 @@ export default function App() {
   async function getAllConversations() {
     let allConversations = await xmtp.conversations.list();
     for (const conversation of allConversations) {
-      console.log(conversation.peerAddress);
+      conversations.push(conversation);
     }
+    setLoadedPeople(true);
+    console.log(conversations);
+  }
+
+  async function loadMessageByPerson(conversation) {
+    console.log(conversation);
   }
 
   function reset() {
@@ -140,7 +149,15 @@ export default function App() {
         <div className="NewMessage Option" onClick={() => {
 
         }}>New Message</div>
-        <div className="Option Site">Words</div>
+        {loadedPeople && <div>
+          {conversations.map((conversation, index) => 
+            <div className="Option Person" key={index}
+              onClick={() => {
+                loadMessageByPerson(conversation);
+              }}
+            >{conversation.peerAddress.substring(0,6) + "..." + conversation.peerAddress.slice(-4)}</div>
+          )}
+        </div>}
       </div>
       <div className="MiddleNav"></div>
     </div>
