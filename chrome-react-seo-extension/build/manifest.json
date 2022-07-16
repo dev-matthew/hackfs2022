@@ -1,17 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Extension Name",
+  "name": "Relay",
   "description": "Extension Decription",
   "version": "0.1.0",
   "icons": {
-      "16": "./Relay.jpeg",
-      "48": "./Relay.jpeg",
-      "128": "./Relay.jpeg"
+      "48": "./relay.jpeg"
   },
   "action": {
-      "default_icon": "./Relay.jpeg",
+      "default_icon": "./relay.jpeg",
       "default_popup": "./index.html",
-      "default_title": "Extension Name"
+      "default_title": "Relay"
   },
   "background": {
       "service_worker": "./scripts/background.js"

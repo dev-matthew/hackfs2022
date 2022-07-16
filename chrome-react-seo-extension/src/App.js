@@ -53,7 +53,7 @@ export default function App() {
   async function getConversations() {
     try {
       const convos = await xmtp.conversations.list();
-      console.log(convos)
+      console.log(convos);
       // var addresses = [];
       // var i = 0;
       // for (const convo of await convos.messages()) {
@@ -77,10 +77,8 @@ export default function App() {
       var messages = [];
       var i = 0;
       for (const message of await convo.messages()) {
-        if (message.senderAddress == xmtp.address) {
           messages[i] = message;
           i += 1;
-        }
       }
 
       messages.forEach(function(item) {
@@ -180,10 +178,11 @@ export default function App() {
             }}>Message</span>
           <span className="LeftNavHeaderOption"
             onClick={() => {
+              getConversations()
             }}
             style={{
               color: activeLeft === 1 ? "white" : "rgba(255,255,255,0.5)"
-            }}>Load Convos</span>
+            }}>Load</span>
           <FiSettings className="OpenSettings Icon"
             onClick={() => {
               setActiveLeft(3);
@@ -195,7 +194,7 @@ export default function App() {
         </div>
       </div>
       <div className="MiddleNav">
-        <ul id="addresses"></ul>
+        <ul id="messages"></ul>
       </div>
     </div>
   );
