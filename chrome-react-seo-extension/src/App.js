@@ -7,6 +7,8 @@ import {Client} from '@xmtp/xmtp-js';
 
 var wallet, xmtp;
 var conversations = [];
+var sites = {"all": []};
+var allMessages = [];
 
 export default function App() {
   const [activeLeft, setActiveLeft] = useState(0);
@@ -14,6 +16,7 @@ export default function App() {
   const [passwordNeeded, setPasswordNeeded] = useState(localStorage.getItem("privateKey") !== null && localStorage.getItem("privateKey").includes("cipher"));
   const [progressWidth, setProgressWidth] = useState(0);
   const [loadedPeople, setLoadedPeople] = useState(false);
+  const [loadedSites, setLoadedSites] = useState(false);
 
   async function handlePrivateKey(privateKey, password) {
     try {
@@ -63,7 +66,7 @@ export default function App() {
   async function getAllMessages(address) {
     let conversation = await xmtp.conversations.newConversation(address);
     let messages = await conversation.messages();
-    console.log(messages);
+    return messages;
   }
 
   async function getAllConversations() {
@@ -77,6 +80,34 @@ export default function App() {
 
   async function loadMessageByPerson(conversation) {
     console.log(conversation);
+    let messages = await getAllMessages(conversation.peerAddress);
+    console.log(messages);
+    for (const message of messages) {
+      let contents = message.content.split("////");
+      let site, content;
+      if (contents.length > 1) {
+        site = contents[0];
+        content = contents[1];
+      } else {
+        site = "None";
+        content = contents[0];
+      }
+
+      if (site in sites) {
+        sites[site].push(content);
+      } else {
+        sites[site] = [content];
+      }
+
+      sites["all"].push(content);
+    }
+
+    console.log(sites);
+    setLoadedSites(true);
+  }
+
+  async function displayMessages(site="all") {
+    let messages = sites[site];
   }
 
   function reset() {
@@ -131,7 +162,7 @@ export default function App() {
               color: activeLeft === 0 ? "white" : "rgba(255,255,255,0.5)"
             }}>People</span>
           <span className="LeftNavHeaderOption"
-            onClick={() => setActiveLeft(1)}
+            onClick={() => setActiveLeft(0)}
             style={{
               color: activeLeft === 1 ? "white" : "rgba(255,255,255,0.5)"
             }}>Sites</span>
@@ -149,7 +180,7 @@ export default function App() {
         <div className="NewMessage Option" onClick={() => {
 
         }}>New Message</div>
-        {loadedPeople && <div>
+        {loadedPeople ? (<div>
           {conversations.map((conversation, index) => 
             <div className="Option Person" key={index}
               onClick={() => {
@@ -157,9 +188,20 @@ export default function App() {
               }}
             >{conversation.peerAddress.substring(0,6) + "..." + conversation.peerAddress.slice(-4)}</div>
           )}
+        </div>) : <div className="Option Person">Loading...</div>}
+      </div>
+      <div className="MiddleNav">
+        {loadedSites && <div>
+          <div className="Option Site">All</div>
+          {Object.keys(sites).map((site, index) => 
+            <div className="Option Site" key={index}
+              onClick={() => {
+                
+              }}
+            >{site}</div>
+          )}
         </div>}
       </div>
-      <div className="MiddleNav"></div>
     </div>
   );
 }

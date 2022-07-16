@@ -19,11 +19,12 @@
 
 .MiddleNav {
   background-color: #30333E;
-  height: 400px;
+  height: 366px;
   width: 180px;
   position: absolute;
   left: 180px;
   top: 0px;
+  padding-top: 34px;
 }
 
 .LeftNavHeader {
@@ -186,4 +187,13 @@
 .Person {
   padding-left: 10px;
   width: 158px;
+}
+
+.Site {
+  padding-left: 10px;
+  width: 158px;
+}
+
+.Site:hover {
+  background-color: #3C3D4D;
 }
