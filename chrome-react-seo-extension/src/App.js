@@ -8,7 +8,6 @@ import {Client} from '@xmtp/xmtp-js';
 var wallet, xmtp;
 var conversations = [];
 var sites = {"all": []};
-var allMessages = [];
 
 export default function App() {
   const [activeLeft, setActiveLeft] = useState(0);
