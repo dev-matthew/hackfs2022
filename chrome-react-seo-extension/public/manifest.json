@@ -15,5 +15,13 @@
   },
   "background": {
       "service_worker": "./scripts/background.js"
-  }
+  },
+  "permissions": [
+    "background",
+    "storage",
+    "unlimitedStorage",
+    "tabs",
+    "activeTab",
+    "notifications"
+  ]
 }

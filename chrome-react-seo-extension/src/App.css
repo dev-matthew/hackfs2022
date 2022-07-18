@@ -10,21 +10,36 @@
 
 .LeftNav {
   background-color: #27282F;
-  height: 400px;
+  height: 360px;
   width: 180px;
   position: absolute;
   left: 0px;
-  top: 0px;
+  top: 40px;
 }
 
 .MiddleNav {
   background-color: #30333E;
-  height: 366px;
+  height: 326px;
   width: 180px;
   position: absolute;
   left: 180px;
-  top: 0px;
+  top: 40px;
   padding-top: 34px;
+}
+
+.MiddleNavHeaderOption {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  user-select: none;
+  color: rgba(255,255,255,0.75);
+}
+
+.MyAddress {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: rgba(255,255,255,0.75);
 }
 
 .LeftNavHeader {
@@ -40,16 +55,13 @@
 .LeftNavHeaderOption {
   margin-left: 10px;
   user-select: none;
-}
-
-.LeftNavHeaderOption:hover {
-  cursor: pointer;
+  color: rgba(255,255,255,0.75);
 }
 
 .OpenSettings {
   position: absolute;
-  font-size: 16px;
-  right: 10px;
+  font-size: 18px;
+  right: 16px;
   top: 12px;
 }
 
@@ -85,6 +97,53 @@
   height: 180px;
   z-index: 1;
   box-shadow: 0px 0px 200px 10px black;
+}
+
+.NewConversationPopup {
+  text-align: center;
+  position: absolute;
+  left: 100px;
+  top: 60px;
+  border-radius: 18px;
+  background-color: #27282F;
+  width: 600px;
+  height: 270px;
+  z-index: 3;
+  box-shadow: 0px 0px 200px 10px black;
+}
+
+#ToAddress {
+  top: 50px;
+}
+
+#ToWebsite {
+  top: 100px;
+  width: 360px;
+}
+
+#ToMessage {
+  top: 150px;
+}
+
+.CurrentWebsite {
+  position: absolute;
+  top: 100px;
+  left: 440px;
+  border: none;
+  background-color: #30333E;
+  color: rgba(255,255,255,0.5);
+  border-radius: 8px;
+  padding-left: 32px;
+  padding-right: 32px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  transition: all 0.3s;
+}
+
+.CurrentWebsite:hover {
+  cursor: pointer;
+  background-color: #3C3D4D;
+  color: white;
 }
 
 .SettingsInput {
@@ -144,6 +203,10 @@
   margin-top: 120px;
 }
 
+.SendMessage{
+  margin-top: 210px;
+}
+
 .Progress {
   position: absolute;
   background-color: rgba(58,207,120,1);
@@ -176,12 +239,26 @@
   cursor: pointer;
 }
 
-.NewMessage {
+.HeaderButton {
   border: 1px solid rgba(255,255,255,0.5);
   padding-top: 5px;
   padding-bottom: 5px;
   font-size: 14px;
   text-align: center;
+  width: 140px;
+  border-radius: 8px;
+  position: absolute;
+  top: 6px;
+  transition: all 0.3s;
+}
+
+.HeaderButton:hover {
+  background-color: #30333E;
+  cursor: pointer;
+}
+
+.NewConversation {
+  right: 50px;
 }
 
 .Person {
@@ -192,8 +269,65 @@
 .Site {
   padding-left: 10px;
   width: 158px;
+  top: 5px;
 }
 
 .Site:hover {
   background-color: #3C3D4D;
+}
+
+.RightNav {
+  position: absolute;
+  top: 40px;
+  left: 360px;
+  height: 360px;
+  width: 440px;
+}
+
+.Messages {
+  position: absolute;
+  top: 80px;
+  left: 0px;
+  height: 260px;
+  width: 400px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.Message {
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+.Left {
+  text-align: left;
+}
+
+.Right {
+  text-align: right;
+}
+
+.TextMessage {
+  border-radius: 8px;
+  background-color: #30333E;
+  position: absolute;
+  bottom: 10px;
+  left: 5px;
+  width: 400px;
+  height: 30px;
+  outline: none;
+  border: none;
+  padding-left: 20px;
+  color: white;
+}
+
+.GlobalHeader {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 40px;
+  width: 800px;
+  background-color: #27282F;
+  z-index: 2;
+  box-shadow: 0px 0px 10px 1px black;
 }

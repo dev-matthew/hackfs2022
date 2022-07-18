@@ -8,7 +8,8 @@ import {Client} from '@xmtp/xmtp-js';
 var wallet, xmtp;
 var conversations = [];
 var sites = {"all": []};
-var allMessages = [];
+var activeMessages;
+var myAddress;
 
 export default function App() {
   const [activeLeft, setActiveLeft] = useState(0);
@@ -17,6 +18,10 @@ export default function App() {
   const [progressWidth, setProgressWidth] = useState(0);
   const [loadedPeople, setLoadedPeople] = useState(false);
   const [loadedSites, setLoadedSites] = useState(false);
+  const [loadedMessages, setLoadedMessages] = useState(false);
+  const [currentAddress, setCurrentAddress] = useState("");
+  const [currentWebsite, setCurrentWebsite] = useState("");
+  const [newConversationPopup, setNewConversationPopup] = useState(false);
 
   async function handlePrivateKey(privateKey, password) {
     try {
@@ -35,7 +40,6 @@ export default function App() {
     }
   }
 
-  // eslint-disable-next-line
   async function activateWallet(password) {
     if (password !== "") {
       try {
@@ -52,15 +56,24 @@ export default function App() {
   }
 
   async function activateXMTP() {
+    myAddress = wallet.address;
     xmtp = await Client.create(wallet);
     console.log(xmtp);
     await getAllConversations();
-    //await sendMessage("0xe2037FD7bEaF4E550C12719aDBdad50F39d3aAE5", "First Message", "uniswap.org")
+    //await sendMessage("0xf82e053D56Ce2feF2EA52d2f120b706A66963327", "Hi this is Person 1 speaking", "google.com")
   }
 
-  async function sendMessage(address, message, website="None") {
-    let conversation = await xmtp.conversations.newConversation(address);
-    await conversation.send(website + "////" + message);
+  async function sendMessage(address, message, website="all") {
+    try {
+      if (website === "") {
+        website = "all"
+      }
+      let conversation = await xmtp.conversations.newConversation(address);
+      await conversation.send(website + "////" + message);
+      console.log("Sent message " + message + " to " + address);
+    } catch (e) {
+      alert("Address is not on the XMTP network yet");
+    }
   }
 
   async function getAllMessages(address) {
@@ -79,8 +92,10 @@ export default function App() {
   }
 
   async function loadMessageByPerson(conversation) {
+    sites = {"all": []};
     console.log(conversation);
     let messages = await getAllMessages(conversation.peerAddress);
+    setCurrentAddress(conversation.peerAddress);
     console.log(messages);
     for (const message of messages) {
       let contents = message.content.split("////");
@@ -89,25 +104,37 @@ export default function App() {
         site = contents[0];
         content = contents[1];
       } else {
-        site = "None";
+        site = "all";
         content = contents[0];
       }
 
-      if (site in sites) {
-        sites[site].push(content);
+      let sender;
+      if (message.senderAddress === myAddress) {
+        sender = "Me - "
       } else {
-        sites[site] = [content];
+        sender = message.senderAddress.substring(0, 6) + "..." + message.senderAddress.slice(-4) + " - ";
       }
 
-      sites["all"].push(content);
+      if (site in sites) {
+        sites[site].push(sender + content);
+        if (site !== "all") {
+          sites["all"].push(sender + content);
+        }
+      } else {
+        sites[site] = [sender + content];
+      }
     }
 
     console.log(sites);
+    setLoadedSites(false);
     setLoadedSites(true);
   }
 
   async function displayMessages(site="all") {
-    let messages = sites[site];
+    activeMessages = sites[site];
+    setCurrentWebsite(site);
+    setLoadedMessages(false);
+    setLoadedMessages(true);
   }
 
   function reset() {
@@ -115,6 +142,12 @@ export default function App() {
     setSettings(false);
     setActiveLeft(0);
     setProgressWidth(0);
+    setNewConversationPopup(false);
+  }
+
+  function isolateWebsite(address) {
+    let url = new URL(address);
+    return url.host
   }
 
   window.onload = function() {
@@ -154,20 +187,37 @@ export default function App() {
             }}>Enter</button>
       </div>}
 
-      <div className="LeftNav">
-        <div className="LeftNavHeader">
-          <span className="LeftNavHeaderOption"
-            onClick={() => setActiveLeft(0)}
-            style={{
-              color: activeLeft === 0 ? "white" : "rgba(255,255,255,0.5)"
-            }}>People</span>
-          <span className="LeftNavHeaderOption"
-            onClick={() => setActiveLeft(0)}
-            style={{
-              color: activeLeft === 1 ? "white" : "rgba(255,255,255,0.5)"
-            }}>Sites</span>
-          
-          <FiSettings className="OpenSettings Icon"
+      {newConversationPopup && <div className="NewConversationPopup">
+        <IoMdClose className="ClosePrivateKey Icon"
+          onClick={() => {
+            reset();
+          }}/>
+        <input className="SettingsInput" id="ToAddress" type="text" autoComplete="off" placeholder="Message Recipient"></input>
+        <input className="SettingsInput" id="ToWebsite" type="text" autoComplete="off" placeholder="Website (Optional)"></input>
+        <button className="CurrentWebsite"
+          onClick={() => {
+            // eslint-disable-next-line
+            chrome.tabs && chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                document.getElementById("ToWebsite").value = isolateWebsite(tabs[0].url);
+            });
+          }}>Current</button>
+        <input className="SettingsInput" id="ToMessage" type="text" autoComplete="off" placeholder="Message"></input>
+        <button className="Save SendMessage"
+            onClick={() => {
+              sendMessage(
+                document.getElementById("ToAddress").value,
+                document.getElementById("ToMessage").value,
+                document.getElementById("ToWebsite").value
+              )
+            }}>Send</button>
+      </div>}
+
+      <div className="GlobalHeader">
+        <span className="MyAddress" title={myAddress}>{(myAddress && "Logged in as " + myAddress.substring(0,6) + "..." + myAddress.slice(-4)) || "Loading..."}</span>
+        <div className="NewConversation HeaderButton" onClick={() => {
+          setNewConversationPopup(true);
+        }}>New Conversation</div>
+        <FiSettings className="OpenSettings Icon"
             onClick={() => {
               setActiveLeft(2);
               setSettings(true);
@@ -175,11 +225,12 @@ export default function App() {
             style={{
               color: activeLeft === 2 ? "white" : "rgba(255,255,255,0.5)"
             }}/>
+      </div>
+
+      <div className="LeftNav">
+        <div className="LeftNavHeader">
+          <span className="LeftNavHeaderOption">People</span>
         </div>
-
-        <div className="NewMessage Option" onClick={() => {
-
-        }}>New Message</div>
         {loadedPeople ? (<div>
           {conversations.map((conversation, index) => 
             <div className="Option Person" key={index}
@@ -191,16 +242,42 @@ export default function App() {
         </div>) : <div className="Option Person">Loading...</div>}
       </div>
       <div className="MiddleNav">
+        <span className="MiddleNavHeaderOption">Sites</span>
         {loadedSites && <div>
-          <div className="Option Site">All</div>
           {Object.keys(sites).map((site, index) => 
             <div className="Option Site" key={index}
               onClick={() => {
-                
+                displayMessages(site);
               }}
             >{site}</div>
           )}
         </div>}
+      </div>
+
+      <div className="RightNav">
+        <div className="RightNavHeader"></div>
+        <div className="Messages">
+          {loadedMessages && <div>
+            {activeMessages.map((message, index) => 
+              <div className={message.includes("Me") ? "Message Right" : "Message Left"} key={index} title={currentWebsite}>{message}</div>
+            )}  
+          </div>}
+        </div>
+
+        {loadedMessages && <input className="TextMessage" type="text" placeholder="Type your message" autoComplete="off"
+          onKeyPress={event => {
+            if (event.key === "Enter") {
+              console.log(event.target.value);
+              sendMessage(currentAddress, event.target.value, currentWebsite);
+              let newMessage = document.createElement("div");
+              newMessage.classList.add("Message");
+              newMessage.classList.add("Right");
+              newMessage.innerHTML = "Me - " + event.target.value;
+              document.getElementsByClassName("Messages")[0].appendChild(newMessage)
+              document.getElementsByClassName("TextMessage")[0].value = "";
+            }
+          }}
+        ></input>}
       </div>
     </div>
   );
