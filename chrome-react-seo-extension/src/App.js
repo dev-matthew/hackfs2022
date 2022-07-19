@@ -28,9 +28,13 @@ export default function App() {
       wallet = new Wallet(privateKey);
       if (password) {
         let encrypted = await wallet.encrypt(password, setProgressWidth);
-        localStorage.setItem("privateKey", encrypted);
+        //localStorage.setItem("privateKey", encrypted);
+        // eslint-disable-next-line
+        chrome.storage.local.set({"privateKey": encrypted}, function() {});
       } else {
-        localStorage.setItem("privateKey", privateKey);
+        //localStorage.setItem("privateKey", privateKey);
+        // eslint-disable-next-line
+        chrome.storage.local.set({"privateKey": privateKey}, function() {});
       }
       console.log(wallet);
       reset();
@@ -117,11 +121,12 @@ export default function App() {
 
       if (site in sites) {
         sites[site].push(sender + content);
-        if (site !== "all") {
-          sites["all"].push(sender + content);
-        }
       } else {
         sites[site] = [sender + content];
+      }
+      
+      if (site !== "all") {
+        sites["all"].push(sender + content);
       }
     }
 
@@ -208,7 +213,8 @@ export default function App() {
                 document.getElementById("ToAddress").value,
                 document.getElementById("ToMessage").value,
                 document.getElementById("ToWebsite").value
-              )
+              );
+              reset();
             }}>Send</button>
       </div>}
 

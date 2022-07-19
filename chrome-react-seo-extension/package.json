@@ -3,23 +3,31 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/core": "^7.18.9",
+    "@babel/preset-env": "^7.18.9",
+    "@craco/craco": "^6.4.5",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "@xmtp/xmtp-js": "^4.4.0",
+    "babelify": "^10.0.0",
+    "browserify": "^17.0.0",
+    "craco": "^0.0.3",
     "ethers": "^5.6.9",
     "node-localstorage": "^2.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.4.0",
     "react-scripts": "4.0.3",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "webpack": "^4.44.2"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build && cp -R ./src/scripts ./build/scripts",
+    "build": "INLINE_RUNTIME_CHUNK=false react-scripts build && browserify ./src/scripts/background.js -o ./build/static/js/background.js",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "background": "browserify ./src/scripts/background.js -o ./build/static/js/background.js"
   },
   "eslintConfig": {
     "extends": [
@@ -40,6 +48,19 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "@babel/preset-env",
+            "@babel/preset-react"
+          ]
+        }
+      ]
     ]
   }
 }

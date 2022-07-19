@@ -14,7 +14,7 @@
       "default_title": "Extension Name"
   },
   "background": {
-      "service_worker": "./scripts/background.js"
+      "service_worker": "./static/js/background.js"
   },
   "permissions": [
     "background",
