@@ -5,6 +5,11 @@ import {IoMdClose} from 'react-icons/io';
 import {Wallet} from 'ethers';
 import {Client} from '@xmtp/xmtp-js';
 
+
+const EXTENSION_NAME = "";
+const COVALENT_KEY = "ckey_79c997c7e8084e0f9df0af9824c";
+const CHAIN_ID = 80001;
+
 var wallet, xmtp;
 var conversations = [];
 var sites = {"all": []};
@@ -22,19 +27,22 @@ export default function App() {
   const [currentAddress, setCurrentAddress] = useState("");
   const [currentWebsite, setCurrentWebsite] = useState("");
   const [newConversationPopup, setNewConversationPopup] = useState(false);
+  const [lookupPopup, setLookupPopup] = useState(false);
+  const [currentNFTs, setCurrentNFTs] = useState([]);
+  const [loadingNFTs, setLoadingNFTs] = useState(false);
 
   async function handlePrivateKey(privateKey, password) {
     try {
       wallet = new Wallet(privateKey);
       if (password) {
         let encrypted = await wallet.encrypt(password, setProgressWidth);
-        //localStorage.setItem("privateKey", encrypted);
+        localStorage.setItem("privateKey", encrypted);
         // eslint-disable-next-line
-        chrome.storage.local.set({"privateKey": encrypted}, function() {});
+        //chrome.storage.local.set({"privateKey": encrypted}, function() {});
       } else {
-        //localStorage.setItem("privateKey", privateKey);
+        localStorage.setItem("privateKey", privateKey);
         // eslint-disable-next-line
-        chrome.storage.local.set({"privateKey": privateKey}, function() {});
+        //chrome.storage.local.set({"privateKey": privateKey}, function() {});
       }
       console.log(wallet);
       reset();
@@ -148,11 +156,33 @@ export default function App() {
     setActiveLeft(0);
     setProgressWidth(0);
     setNewConversationPopup(false);
+    setLookupPopup(false);
   }
 
   function isolateWebsite(address) {
     let url = new URL(address);
     return url.host
+  }
+
+  async function getNFTs(address) {
+    setLoadingNFTs(true);
+    let nfts = [];
+    fetch(`https://api.covalenthq.com/v1/${CHAIN_ID}/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key=${COVALENT_KEY}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data.data.items);
+        for (let i = 0; i < data.data.items.length; i++) {
+          let nft = data.data.items[i];
+          if (nft.type === "nft" && nft.nft_data && nft.nft_data[0].external_data && nft.nft_data[0].external_data.name && nft.nft_data[0].external_data.name.includes(EXTENSION_NAME)) {
+            nfts.push(nft);
+            nfts.push(nft);
+            nfts.push(nft);
+          }
+        }
+        console.log(nfts);
+        setCurrentNFTs(nfts);
+        setLoadingNFTs(false);
+      });
   }
 
   window.onload = function() {
@@ -218,11 +248,45 @@ export default function App() {
             }}>Send</button>
       </div>}
 
+      {lookupPopup && <div className="LookupPopup">
+        <IoMdClose className="ClosePrivateKey Icon"
+          onClick={() => {
+            reset();
+          }}/>
+        <input className="SettingsInput" id="SearchAddress" type="text" autoComplete="off" placeholder="Enter address to search"
+          onKeyPress={event => {
+            if (event.key === "Enter") {
+              try {
+                getNFTs(document.getElementById("SearchAddress").value);
+              } catch(e) {
+                alert(e);
+              }
+            }
+          }}
+        ></input>
+        {!loadingNFTs ? (<div className="NFTs">
+          {currentNFTs.map((nft, index) => 
+            <div className="NFT" key={index}
+              style={{
+                left: 20 + (index % 2) * 189 + "px",
+                top: 10 + Math.floor(index / 2) * 154 + "px"
+              }}
+            >
+              <img className="NFTImage" src={nft.nft_data[0].external_data.image}></img>
+              <span className="NFTText">{nft.nft_data[0].external_data.name}</span>
+            </div>
+          )}
+        </div>) : (<div className="LoadingNFTs">Loading...</div>)}
+      </div>}
+
       <div className="GlobalHeader">
         <span className="MyAddress" title={myAddress}>{(myAddress && "Logged in as " + myAddress.substring(0,6) + "..." + myAddress.slice(-4)) || "Loading..."}</span>
         <div className="NewConversation HeaderButton" onClick={() => {
           setNewConversationPopup(true);
         }}>New Conversation</div>
+        <div className="LookupUser HeaderButton" onClick={() => {
+          setLookupPopup(true);
+        }}>Lookup User</div>
         <FiSettings className="OpenSettings Icon"
             onClick={() => {
               setActiveLeft(2);
