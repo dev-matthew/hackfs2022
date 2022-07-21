@@ -4,11 +4,13 @@ import {FiSettings} from 'react-icons/fi';
 import {IoMdClose} from 'react-icons/io';
 import {Wallet} from 'ethers';
 import {Client} from '@xmtp/xmtp-js';
-
+import {Web3Storage} from 'web3.storage/dist/bundle.esm.min.js';
 
 const EXTENSION_NAME = "";
 const COVALENT_KEY = "ckey_79c997c7e8084e0f9df0af9824c";
-const CHAIN_ID = 80001;
+const WEB3_STORAGE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDY1Nzc1NjBhMjU5ZTVFNkY5ZGY2OUI5MjUzNzg3NjBlM2NiMzE1OTMiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NTgyOTA2ODQwMDYsIm5hbWUiOiJIYWNrRlMyMDIyIn0.pV0ewTBjRB2MVpB8Dkiu8McnSNTCQvVSLeMr8RfVgsM";
+const NFT_PORT_KEY = "ea1e18b5-7e10-4dd5-8354-9198453d55e8";
+const CHAIN_ID = 137; //mumbai 80001, polygon 137
 
 var wallet, xmtp;
 var conversations = [];
@@ -30,6 +32,8 @@ export default function App() {
   const [lookupPopup, setLookupPopup] = useState(false);
   const [currentNFTs, setCurrentNFTs] = useState([]);
   const [loadingNFTs, setLoadingNFTs] = useState(false);
+  const [mintingNFTPopup, setMintingNFTPopup] = useState(false);
+  const [mintStatus, setMintStatus] = useState("Awaiting command...");
 
   async function handlePrivateKey(privateKey, password) {
     try {
@@ -157,6 +161,8 @@ export default function App() {
     setProgressWidth(0);
     setNewConversationPopup(false);
     setLookupPopup(false);
+    setMintingNFTPopup(false);
+    setMintStatus("Awaiting command...");
   }
 
   function isolateWebsite(address) {
@@ -165,24 +171,112 @@ export default function App() {
   }
 
   async function getNFTs(address) {
-    setLoadingNFTs(true);
-    let nfts = [];
-    fetch(`https://api.covalenthq.com/v1/${CHAIN_ID}/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key=${COVALENT_KEY}`)
+    try {
+      //let conversation = await xmtp.conversations.newConversation(address);
+      setLoadingNFTs(true);
+      let nfts = [];
+      fetch(`https://api.covalenthq.com/v1/${CHAIN_ID}/address/${address}/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key=${COVALENT_KEY}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data.data.items);
+          for (let i = 0; i < data.data.items.length; i++) {
+            let nft = data.data.items[i];
+            if (nft.type === "nft" && nft.nft_data && nft.nft_data[0].external_data && nft.nft_data[0].external_data.name && nft.nft_data[0].external_data.name.includes(EXTENSION_NAME)) {
+              nfts.push(nft);
+            }
+          }
+          console.log(nfts);
+          setCurrentNFTs(nfts);
+          setLoadingNFTs(false);
+        });
+    } catch (error) {
+      alert("User is not on the XMTP network yet");
+    }
+  }
+
+  function loadImage(mint) {
+    try {
+      fetch(`https://favicongrabber.com/api/grab/${document.getElementById("CurrentWebsiteInput").value}`, {method: "GET", mode: "cors"})
       .then(response => response.json())
       .then(data => {
-        console.log(data.data.items);
-        for (let i = 0; i < data.data.items.length; i++) {
-          let nft = data.data.items[i];
-          if (nft.type === "nft" && nft.nft_data && nft.nft_data[0].external_data && nft.nft_data[0].external_data.name && nft.nft_data[0].external_data.name.includes(EXTENSION_NAME)) {
-            nfts.push(nft);
-            nfts.push(nft);
-            nfts.push(nft);
+        console.log(data.icons[0].src);
+        var canvas = document.getElementsByClassName("NFTPreview")[0];
+        canvas.width = canvas.height * (canvas.clientWidth / canvas.clientHeight);
+        var context = canvas.getContext("2d");
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        var imageObj1 = new Image();
+        imageObj1.src = "https://i.imgur.com/ZP5RI97.png";
+        imageObj1.crossOrigin = "Anonymous";
+        imageObj1.onload = function() {
+          context.drawImage(imageObj1, -7, -5, 164, 164);
+          context.beginPath();
+          context.arc(76, 76, 42, 0, 2 * Math.PI, false);
+          context.fillStyle = "white";
+          context.fill();
+          context.lineWidth = 5;
+          context.strokeStyle = "white";
+          context.stroke();
+          var imageObj2 = new Image();
+          imageObj2.src = data.icons[0].src;
+          imageObj2.crossOrigin = "Anonymous";
+          imageObj2.onload = function() {
+            context.drawImage(imageObj2, 36, 36, 82, 82);
+            if (mint) {
+              mintNFT(document.getElementById("CurrentWebsiteInput").value);
+            }
           }
         }
-        console.log(nfts);
-        setCurrentNFTs(nfts);
-        setLoadingNFTs(false);
       });
+    } catch (error) {
+      alert(error);
+    }
+  }
+
+  async function mintNFT(url) {
+    let canvas = document.getElementsByClassName("NFTPreview")[0];
+    canvas.toBlob(function(blob) {
+      //const url = URL.createObjectURL(blob);
+      //console.log(url);
+      uploadImage(blob, url);
+    })
+  }
+
+  async function uploadImage(blob, url) {
+    setMintStatus("Uploading to web3.storage...");
+    console.log(blob);
+    let web3StorageClient = new Web3Storage({token: WEB3_STORAGE_KEY});
+    let file = new File([blob], "nft.png");
+    console.log(file);
+    const rootCid = await web3StorageClient.put([file]);
+    console.log(rootCid);
+
+    let IPFS_URL = `https://ipfs.io/ipfs/${rootCid}/nft.png`
+    console.log(IPFS_URL);
+    await handleMint(url, IPFS_URL);
+  }
+
+  async function handleMint(domain, image_url) {
+    setMintStatus("Minting with NFTPort...")
+    let data = {
+      "chain": "polygon",
+      "name": "Noir - " + domain,
+      "description": "Minted via Noir for being a user of " + domain,
+      "file_url": image_url,
+      "mint_to_address": myAddress
+    }
+
+    fetch("https://api.nftport.xyz/v0/mints/easy/urls", {
+      method: "POST",
+      headers: {
+        "Authorization": NFT_PORT_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }).then(response => response.json())
+    .then(data => {
+      console.log(data);
+      setMintStatus("Success!");
+    });
   }
 
   window.onload = function() {
@@ -268,15 +362,38 @@ export default function App() {
           {currentNFTs.map((nft, index) => 
             <div className="NFT" key={index}
               style={{
-                left: 20 + (index % 2) * 189 + "px",
-                top: 10 + Math.floor(index / 2) * 154 + "px"
+                left: 20 + (index % 3) * 189 + "px",
+                top: 10 + Math.floor(index / 3) * 154 + "px"
               }}
             >
-              <img className="NFTImage" src={nft.nft_data[0].external_data.image}></img>
+              <img className="NFTImage" src={nft.nft_data[0].external_data.image} alt={nft.nft_data[0].external_data.name}></img>
               <span className="NFTText">{nft.nft_data[0].external_data.name}</span>
             </div>
           )}
         </div>) : (<div className="LoadingNFTs">Loading...</div>)}
+      </div>}
+
+      {mintingNFTPopup && <div className="MintPopup">
+        <IoMdClose className="ClosePrivateKey Icon"
+          onClick={() => {
+            reset();
+          }}/>
+        <input className="SettingsInput" id="CurrentWebsiteInput" type="text" placeholder="Enter full URL"></input>
+        <button className="CurrentWebsite MintCurrentWebsite"
+          onClick={() => {
+            // eslint-disable-next-line
+            chrome.tabs && chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+              document.getElementById("CurrentWebsiteInput").value = isolateWebsite(tabs[0].url);
+            });
+          }}>Current</button>
+        <button className="Save DisplayButton" onClick={() => {
+          loadImage(false);
+        }}>Display</button>
+        <button className="Save MintButton" onClick={() => {
+          loadImage(true);
+        }}>Mint</button>
+        <span className="MintStatus">{mintStatus}</span>
+        <canvas className="NFTPreview"></canvas>
       </div>}
 
       <div className="GlobalHeader">
@@ -287,6 +404,9 @@ export default function App() {
         <div className="LookupUser HeaderButton" onClick={() => {
           setLookupPopup(true);
         }}>Lookup User</div>
+        <div className="MintNFT HeaderButton" onClick={() => {
+          setMintingNFTPopup(true);
+        }}>Mint NFT</div>
         <FiSettings className="OpenSettings Icon"
             onClick={() => {
               setActiveLeft(2);
@@ -325,7 +445,9 @@ export default function App() {
       </div>
 
       <div className="RightNav">
-        <div className="RightNavHeader"></div>
+        <div className="RightNavHeader">
+          <span className="XMTPTitle"><i>Powered by XMTP</i></span>
+        </div>
         <div className="Messages">
           {loadedMessages && <div>
             {activeMessages.map((message, index) => 

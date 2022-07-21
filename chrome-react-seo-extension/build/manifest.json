@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Extension Name",
-  "description": "Extension Decription",
+  "name": "Noir",
+  "description": "Chat inside, outside, and around web3",
   "version": "0.1.0",
   "icons": {
       "16": "./logo192.png",
@@ -11,7 +11,7 @@
   "action": {
       "default_icon": "./logo192.png",
       "default_popup": "./index.html",
-      "default_title": "Extension Name"
+      "default_title": "Noir"
   },
   "background": {
       "service_worker": "./static/js/background.js"
