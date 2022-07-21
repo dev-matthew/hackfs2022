@@ -235,8 +235,6 @@ export default function App() {
   async function mintNFT(url) {
     let canvas = document.getElementsByClassName("NFTPreview")[0];
     canvas.toBlob(function(blob) {
-      //const url = URL.createObjectURL(blob);
-      //console.log(url);
       uploadImage(blob, url);
     })
   }

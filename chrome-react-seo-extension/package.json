@@ -30,7 +30,7 @@
     "build": "INLINE_RUNTIME_CHUNK=false craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "background": "browserify ./src/scripts/background.js -o ./build/static/js/background.js"
+    "genback": "browserify ./src/scripts/background.js -o ./build/static/js/background.js"
   },
   "eslintConfig": {
     "extends": [
