@@ -6,7 +6,7 @@ import {Wallet} from 'ethers';
 import {Client} from '@xmtp/xmtp-js';
 import {Web3Storage} from 'web3.storage/dist/bundle.esm.min.js';
 
-const EXTENSION_NAME = "";
+const EXTENSION_NAME = "Noir";
 const COVALENT_KEY = "ckey_79c997c7e8084e0f9df0af9824c";
 const WEB3_STORAGE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDY1Nzc1NjBhMjU5ZTVFNkY5ZGY2OUI5MjUzNzg3NjBlM2NiMzE1OTMiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NTgyOTA2ODQwMDYsIm5hbWUiOiJIYWNrRlMyMDIyIn0.pV0ewTBjRB2MVpB8Dkiu8McnSNTCQvVSLeMr8RfVgsM";
 const NFT_PORT_KEY = "ea1e18b5-7e10-4dd5-8354-9198453d55e8";
