@@ -1,5 +1,7 @@
 # Noir - HackFS 2022
 
+![logo192](https://user-images.githubusercontent.com/80741503/180339623-910f0a20-7e8a-470d-9f18-87b681e344e1.png)
+
 ## About
 
 Noir is a Chrome extension that enables easy and secure chatting across websites. Noir is also a social network in the sense that users can mint NFTs for websites they choose, providing easier and more personalized contact between anonymous Ethereum accounts.
