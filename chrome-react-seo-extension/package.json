@@ -28,6 +28,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "INLINE_RUNTIME_CHUNK=false craco build",
+    "build2": "INLINE_RUNTIME_CHUNK=false craco build && browserify ./src/scripts/background.js -o ./build/static/js/background.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "genback": "browserify ./src/scripts/background.js -o ./build/static/js/background.js"
