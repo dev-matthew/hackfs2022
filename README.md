@@ -10,11 +10,21 @@ Noir can be thought of as a web3-oriented messaging app, taking some inspiration
 
 Noir is a Chrome extension built using NodeJS and React. Critical to Noir's functionality are the following sponsors:
 - XMTP
+  - XMTP is used as the messaging protocol powering Noir. When a user first installs the extension, they are logged onto the XMTP network via an Ethers wallet. From then on, messages are signed, sent, and retrieved using XMTP.
+
 - IPFS & Filecoin (web3.storage)
+  - The API of web3.storage is used to upload and host images. The NFTs are made by overlaying the website's favicon on top of Noir's icon, which is then hosted on IPFS.
+
 - NFTPort
+  - NFTPort's API is used to easily mint NFTs for websites and users. These NFTs represent which websites/communities the user is a part of. They are hosted on Polygon and contain a reference to the IPFS CID.
+
 - Covalent
+  - Covalent's API is used to lookup users and view their displayed communities/websites. The API gets a list a user's Noir NFTs that they own and displays them in a popup.
+
 - Valist
+  - The files/build for Noir are hosted on Valist.
 
 ## Future Additions
 
-X
+- [ ] Item 1
+- [ ] Item 2
