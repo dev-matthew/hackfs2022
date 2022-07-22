@@ -29,3 +29,4 @@ Noir is a Chrome extension built using NodeJS and React. Critical to Noir's func
 ## Future Additions
 
 - [ ] Background script to send notifications on new conversation/message
+  - Currently running into errors when using browserify/babel to compile all node modules with script into a single JS file
