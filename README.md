@@ -26,6 +26,9 @@ Noir is a Chrome extension built using NodeJS and React. Critical to Noir's func
 - Valist
   - The files/build for Noir are hosted on Valist.
 
+## Demo / Live Demo
+- [Live Demo](https://github.com/dev-matthew/hackfs2022/blob/react/LIVEDEMO.md)
+
 ## Future Additions
 
 - [ ] Background script to send notifications on new conversation/message
